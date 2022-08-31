@@ -97,3 +97,19 @@ func (a *Adapter) DeleteUser(ctx context.Context, user models.User) models.Error
 
 	return models.Errors{}
 }
+
+func (a *Adapter) UpdateUserFirstName(ctx context.Context, user models.User, new_first_name string) (models.User, models.Errors) {
+	err := validation.Validate(new_first_name, validation.Required, validation.Length(2, 100))
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	account, err := a.query.UpdateUserFirstName(ctx, UpdateUserFirstNameParams{
+		FirstName: new_first_name,
+		ID:        user.Id,
+	})
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	returnUser := mapAccountToUser(account)
+	return returnUser, models.Errors{}
+}

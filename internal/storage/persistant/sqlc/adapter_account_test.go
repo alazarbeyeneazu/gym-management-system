@@ -12,27 +12,32 @@ import (
 
 var adapter *Adapter = NewAdapter("../../../../")
 
-var email = utils.RandomeEmail()
-var firstName = utils.RandomUserName()
-var lastName = utils.RandomUserName()
-var phoneNumber = utils.RandomePhoneNumber()
+func generateRandomUser() models.User {
+	var email = utils.RandomeEmail()
+	var firstName = utils.RandomUserName()
+	var lastName = utils.RandomUserName()
+	var phoneNumber = utils.RandomePhoneNumber()
+	return models.User{
+		FirstName:   firstName,
+		LastName:    lastName,
+		PhoneNumber: phoneNumber,
+		Email:       email,
+		Password:    utils.RandomPassword(),
+	}
 
+}
+
+//test create account
 func TestCreateUser(t *testing.T) {
-
+	randomUser := generateRandomUser()
 	testCase := []struct {
 		name        string
 		account     models.User
 		checkResult func(t *testing.T, user models.User, err models.Errors)
 	}{
 		{
-			name: "ok",
-			account: models.User{
-				FirstName:   firstName,
-				LastName:    lastName,
-				PhoneNumber: phoneNumber,
-				Email:       email,
-				Password:    utils.RandomPassword(),
-			},
+			name:    "ok",
+			account: randomUser,
 			checkResult: func(t *testing.T, user models.User, err models.Errors) {
 				require.Empty(t, err)
 				require.NotEmpty(t, user)
@@ -41,10 +46,10 @@ func TestCreateUser(t *testing.T) {
 				require.NotEmpty(t, user.Email)
 				require.NotEmpty(t, user.State)
 				require.Empty(t, user.Password)
-				require.Equal(t, user.Email, email)
-				require.Equal(t, user.FirstName, firstName)
-				require.Equal(t, user.LastName, lastName)
-				require.Equal(t, phoneNumber, user.PhoneNumber)
+				require.Equal(t, user.Email, randomUser.Email)
+				require.Equal(t, user.FirstName, randomUser.FirstName)
+				require.Equal(t, user.LastName, randomUser.LastName)
+				require.Equal(t, user.PhoneNumber, randomUser.PhoneNumber)
 
 			},
 		},
@@ -139,14 +144,10 @@ func TestCreateUser(t *testing.T) {
 
 }
 
+//test Delete Account
 func TestDeleteUser(t *testing.T) {
-	account, err := adapter.CreateUser(context.Background(), models.User{
-		FirstName:   firstName,
-		LastName:    lastName,
-		PhoneNumber: phoneNumber,
-		Email:       email,
-		Password:    utils.RandomPassword(),
-	})
+	randomUser := generateRandomUser()
+	account, err := adapter.CreateUser(context.Background(), randomUser)
 
 	if err.Err != nil {
 		t.Error(t, err)
@@ -194,4 +195,61 @@ func TestDeleteUser(t *testing.T) {
 		})
 	}
 
+}
+
+//update first name  test
+func TestUpdateFirstName(t *testing.T) {
+	randomUser := generateRandomUser()
+	new_Name := utils.RandomUserName()
+	account, err := adapter.CreateUser(context.Background(), randomUser)
+	if err.Err != nil {
+		t.Error(err)
+	}
+	testCase := []struct {
+		name    string
+		user    models.User
+		newName string
+		checker func(t *testing.T, user models.User, err models.Errors)
+	}{
+		{
+			name:    "ok",
+			user:    account,
+			newName: new_Name,
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.Empty(t, err)
+				require.Equal(t, user.FirstName, new_Name)
+				require.Equal(t, user.Id, account.Id)
+
+			},
+		},
+		{
+			name:    "empty first name",
+			user:    models.User{Id: account.Id},
+			newName: "",
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.NotEmpty(t, err)
+				require.Error(t, err.Err)
+				require.Empty(t, user)
+
+			},
+		},
+		{
+			name:    "too short",
+			user:    models.User{Id: account.Id},
+			newName: "h",
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.NotEmpty(t, err)
+				require.Error(t, err.Err)
+				require.Empty(t, user)
+
+			},
+		},
+	}
+
+	for _, tc := range testCase {
+		t.Run(tc.name, func(t *testing.T) {
+			ant, err := adapter.UpdateUserFirstName(context.Background(), tc.user, tc.newName)
+			tc.checker(t, ant, err)
+		})
+	}
 }
