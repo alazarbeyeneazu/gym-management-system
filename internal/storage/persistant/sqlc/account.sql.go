@@ -15,18 +15,22 @@ INSERT INTO users (
     last_name,
     phone_number,
     email,
-    password
+    password,
+    created_at,
+    state 
 ) values (
-    $1,$2,$3,$4,$5
+    $1,$2,$3,$4,$5,$6,$7
 ) RETURNING id, first_name, last_name, phone_number, email, password, created_at, state
 `
 
 type CreateUserParams struct {
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	PhoneNumber string `json:"phone_number"`
-	Email       string `json:"email"`
-	Password    string `json:"password"`
+	FirstName   string      `json:"first_name"`
+	LastName    string      `json:"last_name"`
+	PhoneNumber string      `json:"phone_number"`
+	Email       string      `json:"email"`
+	Password    string      `json:"password"`
+	CreatedAt   string      `json:"created_at"`
+	State       interface{} `json:"state"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -36,6 +40,8 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.PhoneNumber,
 		arg.Email,
 		arg.Password,
+		arg.CreatedAt,
+		arg.State,
 	)
 	var i User
 	err := row.Scan(
@@ -57,7 +63,7 @@ WHERE id = $1
 RETURNING id, first_name, last_name, phone_number, email, password, created_at, state
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id int32) (User, error) {
+func (q *Queries) DeleteUser(ctx context.Context, id int64) (User, error) {
 	row := q.queryRow(ctx, q.deleteUserStmt, deleteUser, id)
 	var i User
 	err := row.Scan(
@@ -201,7 +207,7 @@ RETURNING id, first_name, last_name, phone_number, email, password, created_at, 
 
 type UpdateUserEmailParams struct {
 	Email string `json:"email"`
-	ID    int32  `json:"id"`
+	ID    int64  `json:"id"`
 }
 
 func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) (User, error) {
@@ -228,7 +234,7 @@ RETURNING id, first_name, last_name, phone_number, email, password, created_at, 
 
 type UpdateUserFirstNameParams struct {
 	FirstName string `json:"first_name"`
-	ID        int32  `json:"id"`
+	ID        int64  `json:"id"`
 }
 
 func (q *Queries) UpdateUserFirstName(ctx context.Context, arg UpdateUserFirstNameParams) (User, error) {
@@ -255,7 +261,7 @@ RETURNING id, first_name, last_name, phone_number, email, password, created_at, 
 
 type UpdateUserLastNameParams struct {
 	LastName string `json:"last_name"`
-	ID       int32  `json:"id"`
+	ID       int64  `json:"id"`
 }
 
 func (q *Queries) UpdateUserLastName(ctx context.Context, arg UpdateUserLastNameParams) (User, error) {
@@ -282,7 +288,7 @@ RETURNING id, first_name, last_name, phone_number, email, password, created_at, 
 
 type UpdateUserPhoneNumberParams struct {
 	PhoneNumber string `json:"phone_number"`
-	ID          int32  `json:"id"`
+	ID          int64  `json:"id"`
 }
 
 func (q *Queries) UpdateUserPhoneNumber(ctx context.Context, arg UpdateUserPhoneNumberParams) (User, error) {
@@ -309,7 +315,7 @@ RETURNING id, first_name, last_name, phone_number, email, password, created_at, 
 
 type UpdateUsersPasswordParams struct {
 	Password string `json:"password"`
-	ID       int32  `json:"id"`
+	ID       int64  `json:"id"`
 }
 
 func (q *Queries) UpdateUsersPassword(ctx context.Context, arg UpdateUsersPasswordParams) (User, error) {

@@ -4,9 +4,11 @@ INSERT INTO users (
     last_name,
     phone_number,
     email,
-    password
+    password,
+    created_at,
+    state 
 ) values (
-    $1,$2,$3,$4,$5
+    $1,$2,$3,$4,$5,$6,$7
 ) RETURNING *;
 
 -- name: DeleteUser :one 

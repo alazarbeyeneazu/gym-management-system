@@ -6,7 +6,7 @@ CREATE TABLE "users" (
   "email" VARCHAR NOT NULL,
   "password" VARCHAR NOT NULL,
   "created_at" VARCHAR NOT NULL,
-  "state" int64 NOT NULL
+  "state" int64 NOT NULL 
 );
 CREATE TABLE "admins" (
   "id" serial PRIMARY KEY,
