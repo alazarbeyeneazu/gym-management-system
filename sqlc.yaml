@@ -1,0 +1,11 @@
+version: 1
+packages:
+  - path: "./internal/storage/persistant/sqlc"
+    name: "db"
+    engine: "postgresql"
+    schema: "./internal/storage/persistant/migration"
+    queries: "./internal/storage/persistant/query/"
+    emit_json_tags: true
+    emit_prepared_queries: true
+    emit_interface: true 
+    emit_exact_table_names: false
