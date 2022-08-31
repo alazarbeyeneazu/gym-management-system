@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -9,12 +10,14 @@ import (
 	"gitlab.com/2ftimeplc/2fbackend/delivery-1/platform/utils"
 )
 
+var adapter *Adapter = NewAdapter("../../../../")
+
+var email = utils.RandomeEmail()
+var firstName = utils.RandomUserName()
+var lastName = utils.RandomUserName()
+var phoneNumber = utils.RandomePhoneNumber()
+
 func TestCreateUser(t *testing.T) {
-	adapter := NewAdapter("../../../../")
-	email := utils.RandomeEmail()
-	firstName := utils.RandomUserName()
-	lastName := utils.RandomUserName()
-	phoneNumber := utils.RandomePhoneNumber()
 
 	testCase := []struct {
 		name        string
@@ -127,8 +130,68 @@ func TestCreateUser(t *testing.T) {
 	}
 
 	for _, tc := range testCase {
-		account, err := adapter.CreateUser(context.Background(), tc.account)
-		tc.checkResult(t, account, err)
+
+		t.Run(tc.name, func(t *testing.T) {
+			account, err := adapter.CreateUser(context.Background(), tc.account)
+			tc.checkResult(t, account, err)
+		})
+	}
+
+}
+
+func TestDeleteUser(t *testing.T) {
+	account, err := adapter.CreateUser(context.Background(), models.User{
+		FirstName:   firstName,
+		LastName:    lastName,
+		PhoneNumber: phoneNumber,
+		Email:       email,
+		Password:    utils.RandomPassword(),
+	})
+
+	if err.Err != nil {
+		t.Error(t, err)
+	}
+
+	testCase := []struct {
+		name    string
+		user    models.User
+		checker func(t *testing.T, err models.Errors)
+	}{
+		{
+			name: "ok",
+			user: account,
+			checker: func(t *testing.T, err models.Errors) {
+				require.Empty(t, err)
+
+			},
+		},
+		{
+			name: "not found ",
+			user: models.User{
+				Id: rand.Int63(),
+			},
+			checker: func(t *testing.T, err models.Errors) {
+				require.NotEmpty(t, err)
+				require.Error(t, err.Err)
+
+			},
+		},
+		{
+			name: "empty id",
+			user: models.User{},
+			checker: func(t *testing.T, err models.Errors) {
+				require.NotEmpty(t, err)
+				require.Error(t, err.Err)
+
+			},
+		},
+	}
+	for _, tc := range testCase {
+
+		t.Run(tc.name, func(t *testing.T) {
+			err := adapter.DeleteUser(context.Background(), tc.user)
+			tc.checker(t, err)
+		})
 	}
 
 }

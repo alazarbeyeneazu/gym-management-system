@@ -87,3 +87,13 @@ func (a *Adapter) CreateUser(ctx context.Context, user models.User) (models.User
 	returnUser := mapAccountToUser(account)
 	return returnUser, models.Errors{}
 }
+
+func (a *Adapter) DeleteUser(ctx context.Context, user models.User) models.Errors {
+
+	_, err := a.query.DeleteUser(ctx, user.Id)
+	if err != nil {
+		return models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 86}
+	}
+
+	return models.Errors{}
+}
