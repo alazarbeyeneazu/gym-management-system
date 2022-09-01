@@ -10,6 +10,8 @@ import (
 
 type UserService interface {
 	RegisterUser(ctx context.Context, user models.User) (models.User, models.Errors)
+	DeleteUser(ctx context.Context, user models.User) models.Errors
+	UpdateUserFirstName(ctx context.Context, user models.User, new_first_name string) (models.User, models.Errors)
 }
 type service struct {
 	databasAdapter ports.DBPort
