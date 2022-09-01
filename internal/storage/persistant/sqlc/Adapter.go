@@ -281,3 +281,18 @@ func (a *Adapter) GetUserByPhoneNumber(ctx context.Context, phone_number string)
 	returnUser := mapAccountToUser(account)
 	return returnUser, models.Errors{}
 }
+
+//get user by email
+
+func (a *Adapter) GetUserByEmail(ctx context.Context, email string) (models.User, models.Errors) {
+	err := validation.Validate(email, validation.Required, is.Email)
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	account, err := a.query.GetUserEmail(ctx, email)
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 175}
+	}
+	returnUser := mapAccountToUser(account)
+	return returnUser, models.Errors{}
+}
