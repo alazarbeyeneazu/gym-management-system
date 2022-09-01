@@ -26,7 +26,7 @@ func validateCreateAccount(user models.User) error {
 		validation.Field(&user.FirstName, validation.Required, validation.Length(2, 100), is.Alpha),
 		validation.Field(&user.LastName, validation.Required, validation.Length(2, 100), is.Alpha),
 		validation.Field(&user.Email, is.Email, validation.Required),
-		validation.Field(&user.Password, validation.Required),
+		validation.Field(&user.Password, validation.Required, validation.Length(8, 1000)),
 		validation.Field(&user.PhoneNumber, validation.Required),
 	)
 	return err
@@ -42,6 +42,7 @@ func mapAccountToUser(account User) models.User {
 		Email:       account.Email,
 		CreatedAt:   account.CreatedAt,
 		State:       account.State,
+		Password:    account.Password,
 	}
 	return returnUser
 }
@@ -192,4 +193,26 @@ func (a *Adapter) UpdateUserEmail(ctx context.Context, user models.User, new_ema
 	returnUser := mapAccountToUser(account)
 	return returnUser, models.Errors{}
 
+}
+
+//update password
+func (a *Adapter) UpdateUserPassword(ctx context.Context, user models.User, new_password string) (models.User, models.Errors) {
+
+	err := validation.Validate(new_password, validation.Required, validation.Length(8, 1000))
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	err = validation.Validate(user.Id, validation.Required)
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	account, err := a.query.UpdateUsersPassword(ctx, UpdateUsersPasswordParams{
+		Password: new_password,
+		ID:       user.Id,
+	})
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 142}
+	}
+	returnUser := mapAccountToUser(account)
+	return returnUser, models.Errors{}
 }

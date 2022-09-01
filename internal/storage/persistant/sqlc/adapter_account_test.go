@@ -425,3 +425,62 @@ func TestUpdateEmail(t *testing.T) {
 		})
 	}
 }
+
+//update phone number  test
+func TestUpdatePassword(t *testing.T) {
+	randomUser := generateRandomUser()
+	new_password := utils.RandomPassword()
+	account, err := adapter.CreateUser(context.Background(), randomUser)
+	if err.Err != nil {
+		t.Error(err)
+	}
+	testCase := []struct {
+		name     string
+		user     models.User
+		password string
+		checker  func(t *testing.T, user models.User, err models.Errors)
+	}{
+		{
+			name:     "ok",
+			user:     account,
+			password: new_password,
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.Empty(t, err)
+				require.Equal(t, user.Password, new_password)
+				require.Equal(t, user.Id, account.Id)
+
+			},
+		},
+		{
+			name:     "empty email name",
+			user:     models.User{Id: account.Id},
+			password: "",
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.NotEmpty(t, err)
+				require.Error(t, err.Err)
+				require.Empty(t, user)
+
+			},
+		},
+		{
+			name:     "short password",
+			user:     models.User{Id: account.Id},
+			password: "thisis",
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.NotEmpty(t, err)
+				require.Error(t, err.Err)
+				require.Empty(t, user)
+
+			},
+		},
+	}
+
+	for _, tc := range testCase {
+		t.Run(tc.name, func(t *testing.T) {
+			ant, err := adapter.UpdateUserPassword(context.Background(), tc.user, tc.password)
+			tc.checker(t, ant, err)
+		})
+	}
+}
+
+//
