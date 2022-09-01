@@ -47,6 +47,25 @@ func mapAccountToUser(account User) models.User {
 	return returnUser
 }
 
+//used to map the values from accounts to model.User
+func mapAccountsToUsers(accounts []User) []models.User {
+	var users []models.User
+	for _, account := range accounts {
+		returnUser := models.User{
+			Id:          account.ID,
+			FirstName:   account.FirstName,
+			LastName:    account.LastName,
+			PhoneNumber: account.PhoneNumber,
+			Email:       account.Email,
+			CreatedAt:   account.CreatedAt,
+			State:       account.State,
+		}
+		users = append(users, returnUser)
+	}
+
+	return users
+}
+
 // addapte to implement database port
 func NewAdapter(env string) *Adapter {
 	config, err := utils.LoadConfig(env)
@@ -215,4 +234,19 @@ func (a *Adapter) UpdateUserPassword(ctx context.Context, user models.User, new_
 	}
 	returnUser := mapAccountToUser(account)
 	return returnUser, models.Errors{}
+}
+
+// get user by first name
+func (a *Adapter) GetUsersByFirstName(ctx context.Context, first_name string) ([]models.User, models.Errors) {
+	err := validation.Validate(first_name, validation.Required, validation.Length(2, 150))
+	if err != nil {
+		return []models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+
+	accounts, err := a.query.GetUsersByFirstName(ctx, first_name)
+	if err != nil {
+		return []models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 150}
+	}
+	returnUsers := mapAccountsToUsers(accounts)
+	return returnUsers, models.Errors{}
 }
