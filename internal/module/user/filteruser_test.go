@@ -66,3 +66,61 @@ func TestGetUserByFirstName(t *testing.T) {
 	}
 
 }
+
+func TestGetUserByLastName(t *testing.T) {
+	appUser := Initiate()
+	lastname := utils.RandomUserName()
+	for i := 0; i < 10; i++ {
+		email := utils.RandomeEmail()
+		firstname := utils.RandomUserName()
+		phoneNumber := utils.RandomePhoneNumber()
+		user := models.User{
+			FirstName:   firstname,
+			LastName:    lastname,
+			Email:       email,
+			PhoneNumber: phoneNumber,
+			Password:    utils.RandomPassword(),
+		}
+		appUser.RegisterUser(context.Background(), user)
+
+	}
+	testCase := []struct {
+		name     string
+		lastName string
+		checker  func(t *testing.T, users []models.User, err models.Errors)
+	}{
+		{
+			name:     "ok",
+			lastName: lastname,
+			checker: func(t *testing.T, users []models.User, err models.Errors) {
+				require.Empty(t, err)
+				require.Equal(t, len(users), 10)
+				require.Equal(t, users[0].LastName, lastname)
+
+			},
+		},
+		{
+			name:     "not found",
+			lastName: utils.RandomUserName(),
+			checker: func(t *testing.T, users []models.User, err models.Errors) {
+				require.Empty(t, users)
+
+			},
+		},
+		{
+			name:     "empty first name ",
+			lastName: "",
+			checker: func(t *testing.T, users []models.User, err models.Errors) {
+				require.Empty(t, users)
+
+			},
+		},
+	}
+	for _, tc := range testCase {
+		t.Run(tc.name, func(t *testing.T) {
+			accounts, err := appUser.GetUsersByLastName(context.Background(), tc.lastName)
+			tc.checker(t, accounts, err)
+		})
+	}
+
+}

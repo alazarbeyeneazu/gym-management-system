@@ -19,3 +19,17 @@ func (s *service) GetUsersByFirstName(ctx context.Context, first_name string) ([
 	}
 	return accounst, models.Errors{}
 }
+
+func (s *service) GetUsersByLastName(ctx context.Context, last_name string) ([]models.User, models.Errors) {
+	err := validation.Validate(last_name, validation.Required, validation.Length(2, 150))
+	if err != nil {
+		return []models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+
+	accounts, errModel := s.GetUsersByLastName(ctx, last_name)
+	if errModel.Err != nil {
+		return []models.User{}, errModel
+	}
+	return accounts, models.Errors{}
+
+}
