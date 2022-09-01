@@ -598,3 +598,50 @@ func TestGetUserByLastName(t *testing.T) {
 	}
 
 }
+
+//testing get user by phoneNumber
+func TestGetUserByPhoneNumber(t *testing.T) {
+	account := generateRandomUser()
+	adapter.CreateUser(context.Background(), account)
+	testCase := []struct {
+		name        string
+		phoneNumber string
+		checker     func(t *testing.T, user models.User, err models.Errors)
+	}{
+		{
+			name:        "ok",
+			phoneNumber: account.PhoneNumber,
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.Empty(t, err)
+				require.Equal(t, user.FirstName, account.FirstName)
+				require.Equal(t, user.LastName, account.LastName)
+				require.Equal(t, user.PhoneNumber, account.PhoneNumber)
+				require.Equal(t, user.Email, account.Email)
+
+			},
+		},
+		{
+			name:        "not found",
+			phoneNumber: utils.RandomUserName(),
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.Empty(t, user)
+
+			},
+		},
+		{
+			name:        "short phone number ",
+			phoneNumber: "2131",
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.Empty(t, user)
+
+			},
+		},
+	}
+	for _, tc := range testCase {
+		t.Run(tc.name, func(t *testing.T) {
+			accounts, err := adapter.GetUserByPhoneNumber(context.Background(), tc.phoneNumber)
+			tc.checker(t, accounts, err)
+		})
+	}
+
+}

@@ -266,3 +266,18 @@ func (a *Adapter) GetUsersByLastName(ctx context.Context, last_name string) ([]m
 	return returnUsers, models.Errors{}
 
 }
+
+//get user by phone number
+func (a *Adapter) GetUserByPhoneNumber(ctx context.Context, phone_number string) (models.User, models.Errors) {
+
+	err := validation.Validate(phone_number, validation.Required, validation.Length(13, 13))
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	account, err := a.query.GetUserByPhoneNumber(ctx, phone_number)
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 167}
+	}
+	returnUser := mapAccountToUser(account)
+	return returnUser, models.Errors{}
+}
