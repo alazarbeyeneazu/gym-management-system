@@ -14,6 +14,7 @@ type UserService interface {
 	UpdateUserFirstName(ctx context.Context, user models.User, new_first_name string) (models.User, models.Errors)
 	UpdateUserLastName(ctx context.Context, user models.User, new_last_name string) (models.User, models.Errors)
 	UpdateUserPhoneNumber(ctx context.Context, user models.User, new_phone_number string) (models.User, models.Errors)
+	GetUserByPhoneNumber(ctx context.Context, phone_number string) (models.User, models.Errors)
 }
 type service struct {
 	databasAdapter ports.DBPort

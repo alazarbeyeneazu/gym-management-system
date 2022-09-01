@@ -33,3 +33,17 @@ func (s *service) GetUsersByLastName(ctx context.Context, last_name string) ([]m
 	return accounts, models.Errors{}
 
 }
+
+func (s *service) GetUserByPhoneNumber(ctx context.Context, phone_number string) (models.User, models.Errors) {
+
+	err := validation.Validate(phone_number, validation.Required, validation.Length(13, 13))
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	account, errorModel := s.databasAdapter.GetUserByPhoneNumber(ctx, phone_number)
+	if errorModel.Err != nil {
+		return models.User{}, errorModel
+	}
+	return account, models.Errors{}
+
+}
