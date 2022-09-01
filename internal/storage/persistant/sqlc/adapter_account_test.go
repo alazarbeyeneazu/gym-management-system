@@ -1,5 +1,6 @@
 package db
 
+// this page only to test user related operations
 import (
 	"context"
 	"math/rand"
@@ -306,6 +307,63 @@ func TestUpdateLastName(t *testing.T) {
 	for _, tc := range testCase {
 		t.Run(tc.name, func(t *testing.T) {
 			ant, err := adapter.UpdateUserLastName(context.Background(), tc.user, tc.newName)
+			tc.checker(t, ant, err)
+		})
+	}
+}
+
+//update phone number  test
+func TestUpdatePhoneNumber(t *testing.T) {
+	randomUser := generateRandomUser()
+	new_phone_number := utils.RandomePhoneNumber()
+	account, err := adapter.CreateUser(context.Background(), randomUser)
+	if err.Err != nil {
+		t.Error(err)
+	}
+	testCase := []struct {
+		name        string
+		user        models.User
+		phoneNumber string
+		checker     func(t *testing.T, user models.User, err models.Errors)
+	}{
+		{
+			name:        "ok",
+			user:        account,
+			phoneNumber: new_phone_number,
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.Empty(t, err)
+				require.Equal(t, user.PhoneNumber, new_phone_number)
+				require.Equal(t, user.Id, account.Id)
+
+			},
+		},
+		{
+			name:        "empty Last name",
+			user:        models.User{Id: account.Id},
+			phoneNumber: "",
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.NotEmpty(t, err)
+				require.Error(t, err.Err)
+				require.Empty(t, user)
+
+			},
+		},
+		{
+			name:        "too short",
+			user:        models.User{Id: account.Id},
+			phoneNumber: "09751461",
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.NotEmpty(t, err)
+				require.Error(t, err.Err)
+				require.Empty(t, user)
+
+			},
+		},
+	}
+
+	for _, tc := range testCase {
+		t.Run(tc.name, func(t *testing.T) {
+			ant, err := adapter.UpdateUserPhoneNumber(context.Background(), tc.user, tc.phoneNumber)
 			tc.checker(t, ant, err)
 		})
 	}

@@ -1,5 +1,6 @@
 package db
 
+//this is adapter page which implements DBPort interface
 import (
 	"context"
 	"database/sql"
@@ -45,6 +46,7 @@ func mapAccountToUser(account User) models.User {
 	return returnUser
 }
 
+// addapte to implement database port
 func NewAdapter(env string) *Adapter {
 	config, err := utils.LoadConfig(env)
 	if err != nil {
@@ -63,9 +65,13 @@ func NewAdapter(env string) *Adapter {
 		query: query,
 	}
 }
+
+//close the database
 func (a *Adapter) Close(ctx context.Context) error {
 	return a.query.Close()
 }
+
+//implement create user for database
 func (a *Adapter) CreateUser(ctx context.Context, user models.User) (models.User, models.Errors) {
 	err := validateCreateAccount(user)
 	if err != nil {
@@ -88,6 +94,8 @@ func (a *Adapter) CreateUser(ctx context.Context, user models.User) (models.User
 	return returnUser, models.Errors{}
 }
 
+//implement delete user
+
 func (a *Adapter) DeleteUser(ctx context.Context, user models.User) models.Errors {
 
 	_, err := a.query.DeleteUser(ctx, user.Id)
@@ -98,8 +106,13 @@ func (a *Adapter) DeleteUser(ctx context.Context, user models.User) models.Error
 	return models.Errors{}
 }
 
+//implement update first name for database
 func (a *Adapter) UpdateUserFirstName(ctx context.Context, user models.User, new_first_name string) (models.User, models.Errors) {
 	err := validation.Validate(new_first_name, validation.Required, validation.Length(2, 100))
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	err = validation.Validate(user.Id, validation.Required)
 	if err != nil {
 		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
 	}
@@ -114,17 +127,46 @@ func (a *Adapter) UpdateUserFirstName(ctx context.Context, user models.User, new
 	return returnUser, models.Errors{}
 }
 
+//update last name
 func (a *Adapter) UpdateUserLastName(ctx context.Context, user models.User, new_last_name string) (models.User, models.Errors) {
+
 	err := validation.Validate(new_last_name, validation.Required, validation.Length(2, 100))
 	if err != nil {
 		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
 	}
+	err = validation.Validate(user.Id, validation.Required)
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+
 	account, err := a.query.UpdateUserLastName(ctx, UpdateUserLastNameParams{
 		LastName: new_last_name,
 		ID:       user.Id,
 	})
 	if err != nil {
 		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 108}
+	}
+	returnUser := mapAccountToUser(account)
+	return returnUser, models.Errors{}
+}
+
+//update phone number for user
+func (a *Adapter) UpdateUserPhoneNumber(ctx context.Context, user models.User, new_phone_number string) (models.User, models.Errors) {
+
+	err := validation.Validate(new_phone_number, validation.Required, validation.Length(13, 13))
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	err = validation.Validate(user.Id, validation.Required)
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	account, err := a.query.UpdateUserPhoneNumber(ctx, UpdateUserPhoneNumberParams{
+		PhoneNumber: new_phone_number,
+		ID:          user.Id,
+	})
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 119}
 	}
 	returnUser := mapAccountToUser(account)
 	return returnUser, models.Errors{}
