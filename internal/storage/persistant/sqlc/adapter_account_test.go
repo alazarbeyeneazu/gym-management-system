@@ -338,7 +338,7 @@ func TestUpdatePhoneNumber(t *testing.T) {
 			},
 		},
 		{
-			name:        "empty Last name",
+			name:        "empty phone number",
 			user:        models.User{Id: account.Id},
 			phoneNumber: "",
 			checker: func(t *testing.T, user models.User, err models.Errors) {
@@ -364,6 +364,63 @@ func TestUpdatePhoneNumber(t *testing.T) {
 	for _, tc := range testCase {
 		t.Run(tc.name, func(t *testing.T) {
 			ant, err := adapter.UpdateUserPhoneNumber(context.Background(), tc.user, tc.phoneNumber)
+			tc.checker(t, ant, err)
+		})
+	}
+}
+
+//update phone number  test
+func TestUpdateEmail(t *testing.T) {
+	randomUser := generateRandomUser()
+	new_email := utils.RandomeEmail()
+	account, err := adapter.CreateUser(context.Background(), randomUser)
+	if err.Err != nil {
+		t.Error(err)
+	}
+	testCase := []struct {
+		name    string
+		user    models.User
+		email   string
+		checker func(t *testing.T, user models.User, err models.Errors)
+	}{
+		{
+			name:  "ok",
+			user:  account,
+			email: new_email,
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.Empty(t, err)
+				require.Equal(t, user.Email, new_email)
+				require.Equal(t, user.Id, account.Id)
+
+			},
+		},
+		{
+			name:  "empty email name",
+			user:  models.User{Id: account.Id},
+			email: "",
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.NotEmpty(t, err)
+				require.Error(t, err.Err)
+				require.Empty(t, user)
+
+			},
+		},
+		{
+			name:  "invalid email format",
+			user:  models.User{Id: account.Id},
+			email: "thisisnotemail.com",
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.NotEmpty(t, err)
+				require.Error(t, err.Err)
+				require.Empty(t, user)
+
+			},
+		},
+	}
+
+	for _, tc := range testCase {
+		t.Run(tc.name, func(t *testing.T) {
+			ant, err := adapter.UpdateUserEmail(context.Background(), tc.user, tc.email)
 			tc.checker(t, ant, err)
 		})
 	}

@@ -171,3 +171,25 @@ func (a *Adapter) UpdateUserPhoneNumber(ctx context.Context, user models.User, n
 	returnUser := mapAccountToUser(account)
 	return returnUser, models.Errors{}
 }
+
+//update email for the user
+func (a *Adapter) UpdateUserEmail(ctx context.Context, user models.User, new_email string) (models.User, models.Errors) {
+	err := validation.Validate(new_email, validation.Required, is.Email)
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	err = validation.Validate(user.Id, validation.Required)
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	account, err := a.query.UpdateUserEmail(ctx, UpdateUserEmailParams{
+		Email: new_email,
+		ID:    user.Id,
+	})
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 130}
+	}
+	returnUser := mapAccountToUser(account)
+	return returnUser, models.Errors{}
+
+}
