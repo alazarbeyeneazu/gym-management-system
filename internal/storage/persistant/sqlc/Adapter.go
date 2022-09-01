@@ -113,3 +113,19 @@ func (a *Adapter) UpdateUserFirstName(ctx context.Context, user models.User, new
 	returnUser := mapAccountToUser(account)
 	return returnUser, models.Errors{}
 }
+
+func (a *Adapter) UpdateUserLastName(ctx context.Context, user models.User, new_last_name string) (models.User, models.Errors) {
+	err := validation.Validate(new_last_name, validation.Required, validation.Length(2, 100))
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	account, err := a.query.UpdateUserLastName(ctx, UpdateUserLastNameParams{
+		LastName: new_last_name,
+		ID:       user.Id,
+	})
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 108}
+	}
+	returnUser := mapAccountToUser(account)
+	return returnUser, models.Errors{}
+}

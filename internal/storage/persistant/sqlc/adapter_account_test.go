@@ -253,3 +253,60 @@ func TestUpdateFirstName(t *testing.T) {
 		})
 	}
 }
+
+//update last  name  test
+func TestUpdateLastName(t *testing.T) {
+	randomUser := generateRandomUser()
+	new_Name := utils.RandomUserName()
+	account, err := adapter.CreateUser(context.Background(), randomUser)
+	if err.Err != nil {
+		t.Error(err)
+	}
+	testCase := []struct {
+		name    string
+		user    models.User
+		newName string
+		checker func(t *testing.T, user models.User, err models.Errors)
+	}{
+		{
+			name:    "ok",
+			user:    account,
+			newName: new_Name,
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.Empty(t, err)
+				require.Equal(t, user.LastName, new_Name)
+				require.Equal(t, user.Id, account.Id)
+
+			},
+		},
+		{
+			name:    "empty Last name",
+			user:    models.User{Id: account.Id},
+			newName: "",
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.NotEmpty(t, err)
+				require.Error(t, err.Err)
+				require.Empty(t, user)
+
+			},
+		},
+		{
+			name:    "too short",
+			user:    models.User{Id: account.Id},
+			newName: "h",
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.NotEmpty(t, err)
+				require.Error(t, err.Err)
+				require.Empty(t, user)
+
+			},
+		},
+	}
+
+	for _, tc := range testCase {
+		t.Run(tc.name, func(t *testing.T) {
+			ant, err := adapter.UpdateUserLastName(context.Background(), tc.user, tc.newName)
+			tc.checker(t, ant, err)
+		})
+	}
+}
