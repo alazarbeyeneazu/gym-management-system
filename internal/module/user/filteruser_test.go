@@ -171,3 +171,50 @@ func TestGetUserByPhoneNumber(t *testing.T) {
 	}
 
 }
+
+func TestGetUserByEmail(t *testing.T) {
+	appUser := Initiate()
+	account := generateRandomUser()
+	appUser.RegisterUser(context.Background(), account)
+	testCase := []struct {
+		name    string
+		email   string
+		checker func(t *testing.T, user models.User, err models.Errors)
+	}{
+		{
+			name:  "ok",
+			email: account.Email,
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.Empty(t, err)
+				require.Equal(t, user.FirstName, account.FirstName)
+				require.Equal(t, user.LastName, account.LastName)
+				require.Equal(t, user.PhoneNumber, account.PhoneNumber)
+				require.Equal(t, user.Email, account.Email)
+
+			},
+		},
+		{
+			name:  "not found",
+			email: utils.RandomeEmail(),
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.Empty(t, user)
+
+			},
+		},
+		{
+			name:  "invalid email  ",
+			email: "2131.com",
+			checker: func(t *testing.T, user models.User, err models.Errors) {
+				require.Empty(t, user)
+
+			},
+		},
+	}
+	for _, tc := range testCase {
+		t.Run(tc.name, func(t *testing.T) {
+			accounts, err := appUser.GetUserByEmail(context.Background(), tc.email)
+			tc.checker(t, accounts, err)
+		})
+	}
+
+}

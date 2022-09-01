@@ -4,6 +4,7 @@ import (
 	"context"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"gitlab.com/2ftimeplc/2fbackend/delivery-1/internal/constants/models"
 )
 
@@ -46,4 +47,16 @@ func (s *service) GetUserByPhoneNumber(ctx context.Context, phone_number string)
 	}
 	return account, models.Errors{}
 
+}
+
+func (s *service) GetUserByEmail(ctx context.Context, email string) (models.User, models.Errors) {
+	err := validation.Validate(email, validation.Required, is.Email)
+	if err != nil {
+		return models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+	account, errModel := s.databasAdapter.GetUserByEmail(ctx, email)
+	if errModel.Err != nil {
+		return models.User{}, errModel
+	}
+	return account, models.Errors{}
 }
