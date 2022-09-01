@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	validation "github.com/go-ozzo/ozzo-validation"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 	_ "github.com/lib/pq"
 
@@ -87,8 +87,12 @@ func NewAdapter(env string) *Adapter {
 }
 
 //close the database
-func (a *Adapter) Close(ctx context.Context) error {
-	return a.query.Close()
+func (a *Adapter) Close(ctx context.Context) models.Errors {
+	err := a.query.Close()
+	if err != nil {
+		return models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 93}
+	}
+	return models.Errors{}
 }
 
 //implement create user for database

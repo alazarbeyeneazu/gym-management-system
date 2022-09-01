@@ -46,7 +46,6 @@ func TestCreateUser(t *testing.T) {
 				require.NotEmpty(t, user.LastName)
 				require.NotEmpty(t, user.Email)
 				require.NotEmpty(t, user.State)
-				require.Empty(t, user.Password)
 				require.Equal(t, user.Email, randomUser.Email)
 				require.Equal(t, user.FirstName, randomUser.FirstName)
 				require.Equal(t, user.LastName, randomUser.LastName)
