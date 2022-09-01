@@ -250,3 +250,19 @@ func (a *Adapter) GetUsersByFirstName(ctx context.Context, first_name string) ([
 	returnUsers := mapAccountsToUsers(accounts)
 	return returnUsers, models.Errors{}
 }
+
+//get user by last name
+func (a *Adapter) GetUsersByLastName(ctx context.Context, last_name string) ([]models.User, models.Errors) {
+	err := validation.Validate(last_name, validation.Required, validation.Length(2, 150))
+	if err != nil {
+		return []models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 96}
+	}
+
+	accounts, err := a.query.GetUsersByLastName(ctx, last_name)
+	if err != nil {
+		return []models.User{}, models.Errors{Err: err, ErrorLocation: "internal/storage/persistant/sqlc/Adapter.go", ErrLine: 158}
+	}
+	returnUsers := mapAccountsToUsers(accounts)
+	return returnUsers, models.Errors{}
+
+}
