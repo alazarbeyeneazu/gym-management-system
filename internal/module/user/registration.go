@@ -35,6 +35,7 @@ func createHasedUser(user models.User) (models.User, error) {
 	}
 	return hashed_password_user, nil
 }
+
 func (s *service) RegisterUser(ctx context.Context, user models.User) (models.User, models.Errors) {
 	err := validateUser(user)
 	if err != nil {

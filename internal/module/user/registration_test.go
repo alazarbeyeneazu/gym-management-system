@@ -2,10 +2,14 @@ package user
 
 import (
 	"context"
+	"math/rand"
 	"testing"
+	"time"
 
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	"gitlab.com/2ftimeplc/2fbackend/delivery-1/internal/constants/models"
+	mockdb "gitlab.com/2ftimeplc/2fbackend/delivery-1/mocks/db"
 	"gitlab.com/2ftimeplc/2fbackend/delivery-1/platform/utils"
 )
 
@@ -15,17 +19,23 @@ func generateRandomUser() models.User {
 	var lastName = utils.RandomUserName()
 	var phoneNumber = utils.RandomePhoneNumber()
 	return models.User{
+		Id:          rand.Int63(),
 		FirstName:   firstName,
 		LastName:    lastName,
 		PhoneNumber: phoneNumber,
 		Email:       email,
+		State:       1,
+		CreatedAt:   time.Now().GoString(),
 		Password:    utils.RandomPassword(),
 	}
 
 }
+
 func TestRegisterUser(t *testing.T) {
-	appUser := Initiate()
+	ctl := gomock.NewController(t)
+	db := mockdb.NewMockDBPort(ctl)
 	randomUser := generateRandomUser()
+
 	testCase := []struct {
 		name        string
 		account     models.User
@@ -132,8 +142,45 @@ func TestRegisterUser(t *testing.T) {
 	for _, tc := range testCase {
 
 		t.Run(tc.name, func(t *testing.T) {
-			account, err := appUser.RegisterUser(context.Background(), tc.account)
-			tc.checkResult(t, account, err)
+			switch tc.name {
+			case "ok":
+				defer ctl.Finish()
+				db.EXPECT().CreateUser(context.Background(), gomock.Any()).Return(randomUser, models.Errors{})
+				appUser := Initiate("../../../", db)
+				accounts, err := appUser.RegisterUser(context.Background(), tc.account)
+				tc.checkResult(t, accounts, err)
+			case "empty first name":
+				defer ctl.Finish()
+				db.EXPECT().CreateUser(context.Background(), gomock.Any()).Return(randomUser, models.Errors{})
+				appUser := Initiate("../../../", db)
+				accounts, err := appUser.RegisterUser(context.Background(), tc.account)
+				tc.checkResult(t, accounts, err)
+			case "empty last name":
+				defer ctl.Finish()
+				db.EXPECT().CreateUser(context.Background(), gomock.Any()).Return(randomUser, models.Errors{})
+				appUser := Initiate("../../../", db)
+				accounts, err := appUser.RegisterUser(context.Background(), tc.account)
+				tc.checkResult(t, accounts, err)
+			case "Empty PhoneNumber":
+				defer ctl.Finish()
+				db.EXPECT().CreateUser(context.Background(), gomock.Any()).Return(randomUser, models.Errors{})
+				appUser := Initiate("../../../", db)
+				accounts, err := appUser.RegisterUser(context.Background(), tc.account)
+				tc.checkResult(t, accounts, err)
+			case "empty email":
+				defer ctl.Finish()
+				db.EXPECT().CreateUser(context.Background(), gomock.Any()).Return(randomUser, models.Errors{})
+				appUser := Initiate("../../../", db)
+				accounts, err := appUser.RegisterUser(context.Background(), tc.account)
+				tc.checkResult(t, accounts, err)
+			case "empty password":
+				defer ctl.Finish()
+				db.EXPECT().CreateUser(context.Background(), gomock.Any()).Return(randomUser, models.Errors{})
+				appUser := Initiate("../../../", db)
+				accounts, err := appUser.RegisterUser(context.Background(), tc.account)
+				tc.checkResult(t, accounts, err)
+
+			}
 		})
 	}
 
