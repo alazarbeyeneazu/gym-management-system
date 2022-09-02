@@ -8,7 +8,7 @@ import (
 )
 
 func (s *service) DeleteUser(ctx context.Context, user models.User) models.Errors {
-	err := validation.Validate(user.Id)
+	err := validation.Validate(user.Id, validation.Required)
 	if err != nil {
 		return models.Errors{Err: err, ErrorLocation: "/internal/module/user/registration.go"}
 	}
