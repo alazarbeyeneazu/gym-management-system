@@ -35,6 +35,7 @@ func TestResgisterUser(t *testing.T) {
 	hdler := Init(service)
 	router := gin.New()
 	url := "/register"
+
 	router.POST("/register", hdler.RegisterUser)
 
 	testUser := models.User{
