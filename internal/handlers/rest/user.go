@@ -37,7 +37,7 @@ func validateUser(user models.User, functionName string) error {
 			validation.Field(&user.LastName, validation.Required, validation.Length(2, 100), is.Alpha),
 			validation.Field(&user.Email, is.Email, validation.Required),
 			validation.Field(&user.Password, validation.Required, validation.Length(8, 1000)),
-			validation.Field(&user.PhoneNumber, validation.Required),
+			validation.Field(&user.PhoneNumber, validation.Required, validation.Length(13, 13)),
 		)
 		return err
 	}
@@ -64,6 +64,7 @@ func (u *userHandler) RegisterUser(ctx *gin.Context) {
 	err := validateUser(newUser, "RegisterUser")
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, models.RestResponse{
+
 			Error:  err.Error(),
 			Status: "not registered",
 			User:   models.User{},
@@ -81,7 +82,7 @@ func (u *userHandler) RegisterUser(ctx *gin.Context) {
 		} else if errmodel.Err.Error() == "pq: duplicate key value violates unique constraint \"users_email_key\"" {
 			duperr = errors.New("email already registered")
 		} else {
-			duperr = errors.New("internal error")
+			duperr = err
 		}
 
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, models.RestResponse{

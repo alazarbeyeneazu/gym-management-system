@@ -1,7 +1,7 @@
 package main
 
 import (
-	handler "gitlab.com/2ftimeplc/2fbackend/delivery-1/internal/handlers/rest/user"
+	handler "gitlab.com/2ftimeplc/2fbackend/delivery-1/internal/handlers/rest"
 	"gitlab.com/2ftimeplc/2fbackend/delivery-1/internal/module/user"
 	db "gitlab.com/2ftimeplc/2fbackend/delivery-1/internal/storage/persistant/sqlc"
 	"gitlab.com/2ftimeplc/2fbackend/delivery-1/platform/routers"

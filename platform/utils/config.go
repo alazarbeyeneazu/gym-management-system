@@ -5,6 +5,7 @@ import "github.com/spf13/viper"
 type Config struct {
 	DBDriver string `mapstructure:"DB_DRIVER"`
 	DBSource string `mapstructure:"DB_SOURCE"`
+	TokenKey string `mapstructure:"TOKEN_KEY"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
