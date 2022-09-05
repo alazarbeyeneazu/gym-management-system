@@ -10,3 +10,8 @@ type User struct {
 	Password    string `json:"password"`
 	State       int64  `json:"state"`
 }
+type RestResponse struct {
+	Error  string `json:"error"`
+	Status string `json:"stats"`
+	User   User   `json:"user"`
+}

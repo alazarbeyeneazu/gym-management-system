@@ -6,6 +6,8 @@ import (
 	"gitlab.com/2ftimeplc/2fbackend/delivery-1/internal/constants/models"
 )
 
+//go:generate echo $PWD - $GOPACKAGE - $GOFILE
+//go:generate mockgen -package mockdb -destination ../mocks/db/mockdb.go gitlab.com/2ftimeplc/2fbackend/delivery-1/ports DBPort
 type DBPort interface {
 	Close(ctx context.Context) models.Errors
 	CreateUser(ctx context.Context, user models.User) (models.User, models.Errors)

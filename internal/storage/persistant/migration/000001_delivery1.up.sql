@@ -2,8 +2,8 @@ CREATE TABLE "users" (
   "id" serial PRIMARY KEY,
   "first_name" VARCHAR NOT NULL,
   "last_name" VARCHAR NOT NULL,
-  "phone_number" VARCHAR NOT NULL,
-  "email" VARCHAR NOT NULL,
+  "phone_number" VARCHAR NOT NULL UNIQUE,
+  "email" VARCHAR NOT NULL UNIQUE,
   "password" VARCHAR NOT NULL,
   "created_at" VARCHAR NOT NULL,
   "state" int64 NOT NULL 

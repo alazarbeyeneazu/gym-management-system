@@ -1,3 +1,4 @@
 package ports
 
-type HandlerPort interface{}
+type HandlerPort interface {
+}

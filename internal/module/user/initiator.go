@@ -4,10 +4,11 @@ import (
 	"context"
 
 	"gitlab.com/2ftimeplc/2fbackend/delivery-1/internal/constants/models"
-	db "gitlab.com/2ftimeplc/2fbackend/delivery-1/internal/storage/persistant/sqlc"
 	"gitlab.com/2ftimeplc/2fbackend/delivery-1/ports"
 )
 
+//go:generate echo $PWD - $GOPACKAGE - $GOFILE
+//go:generate mockgen -package mockapp -destination ../../../mocks/app/appMock.go gitlab.com/2ftimeplc/2fbackend/delivery-1/internal/module/user UserService
 type UserService interface {
 	RegisterUser(ctx context.Context, user models.User) (models.User, models.Errors)
 	DeleteUser(ctx context.Context, user models.User) models.Errors
@@ -27,7 +28,6 @@ type service struct {
 	databasAdapter ports.DBPort
 }
 
-func Initiate() *service {
-	database := db.NewAdapter("../../../")
-	return &service{databasAdapter: database}
+func Initiate(env string, dbs ports.DBPort) *service {
+	return &service{databasAdapter: dbs}
 }
